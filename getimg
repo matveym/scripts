@@ -1,1 +1,40 @@
-/Users/amaslov/bin/getimg
+#!/bin/bash
+
+# src='/Users/amaslov/Temp/DCIM'
+# dst='/Users/amaslov/Temp/Photos'
+src='/Volumes/EOS_DIGITAL/DCIM'
+dst='/Users/amaslov/Pictures/Photos'
+raw_type='CR2'
+raws=`find $src -type f -iname *.$raw_type`
+raws_cnt=$(echo "$raws" | grep -v ^$ | wc -l)
+jpgs=`find $src -type f -iname *.JPG`
+jpgs_cnt=$(echo "$jpgs" | grep -v ^$ | wc -l)
+before_cnt=`find $dst -type f -iregex ".*/01-.*/[^.].*" | wc -l`
+img_cnt=$(echo -e "${raws}\n${jpgs}" | grep -v ^$ | sed -e 's;.*/;;' | cut -d. -f1 | sort -u | wc -l)
+
+echo "$img_cnt images ($raws_cnt $raw_types, $jpgs_cnt JPGs)"
+
+copyFiles() {
+for file in $1
+do
+    path="$dst/$(exiftool -d '%Y/%m-%d' -s -s -s -DateTimeOriginal $file)/01-$2"
+    if [ ! -e "$path/${file##/*/}" ]
+    then
+        echo $file
+        mkdir -p $path
+        cp -n $file $path
+    fi
+done
+}
+
+copyFiles "$raws" "RAW"
+copyFiles "$jpgs" "JPG"
+
+after_cnt=`find $dst -type f -iregex ".*/01-.*/[^.].*" | wc -l`
+cp_cnt=$((after_cnt - before_cnt ))
+if [ $cp_cnt -eq $((raws_cnt + jpgs_cnt)) ]
+then
+    echo "All files copied successfully"
+else
+    echo "$cp_cnt files copied"
+fi
