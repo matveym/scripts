@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# src='/Users/amaslov/Temp/DCIM'
-# dst='/Users/amaslov/Temp/Photos'
-src='/Volumes/EOS_DIGITAL/DCIM'
-dst='/Users/amaslov/Pictures/Photos'
-raw_type='CR2'
-raws=`find $src -type f -iname *.$raw_type`
+src=$1
+# dst=~/Temp/Photos
+dst=~/Pictures/Photos
+jpg_dir="$3"
+raw_type="$2"
+raws=`find $src -type f -iname "*.$raw_type"`
 raws_cnt=$(echo "$raws" | grep -v ^$ | wc -l)
-jpgs=`find $src -type f -iname *.JPG`
+jpgs=`find $src -type f -iname "*.JPG"`
 jpgs_cnt=$(echo "$jpgs" | grep -v ^$ | wc -l)
 before_cnt=`find $dst -type f -iregex ".*/01-.*/[^.].*" | wc -l`
 img_cnt=$(echo -e "${raws}\n${jpgs}" | grep -v ^$ | sed -e 's;.*/;;' | cut -d. -f1 | sort -u | wc -l)
 
-echo "$img_cnt images ($raws_cnt $raw_types, $jpgs_cnt JPGs)"
+echo "$img_cnt images ($raws_cnt ${raw_type}s, $jpgs_cnt JPGs)"
 
 copyFiles() {
 for file in $1
@@ -27,8 +27,10 @@ do
 done
 }
 
-copyFiles "$raws" "RAW"
-copyFiles "$jpgs" "JPG"
+copyFiles "$raws" "$raw_type"
+copyFiles "$jpgs" "$jpg_dir"
+
+echo "$img_cnt images ($raws_cnt ${raw_type}s, $jpgs_cnt JPGs)"
 
 after_cnt=`find $dst -type f -iregex ".*/01-.*/[^.].*" | wc -l`
 cp_cnt=$((after_cnt - before_cnt ))
