@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SAVEIFS=$IFS
+IFS=$(echo -en "\n\b")
 src=$1
 # dst=~/Temp/Photos
 dst=~/Pictures/Photos
@@ -40,3 +42,4 @@ then
 else
     echo "$cp_cnt files copied"
 fi
+IFS=$SAVEIFS
